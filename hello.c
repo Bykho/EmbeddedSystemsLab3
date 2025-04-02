@@ -69,8 +69,8 @@ int main()
   }
 
   // Set ball position to center of screen
-  vla.position.x = 320;  // Assuming 640x480 display
-  vla.position.y = 240;
+  vla.position.x = 20;  // Assuming 640x480 display
+  vla.position.y = 20;
 
   if (ioctl(vga_ball_fd, VGA_BALL_WRITE_POSITION, &vla)) {
       perror("ioctl(VGA_BALL_WRITE_POSITION) failed");
