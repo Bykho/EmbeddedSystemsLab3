@@ -1,5 +1,5 @@
-/*
- * Userspace program that communicates with the vga_ball device driver
+
+ 
  * through ioctls
  *
  * Stephen A. Edwards
