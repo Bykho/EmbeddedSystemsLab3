@@ -108,7 +108,7 @@ static struct miscdevice vga_ball_misc_device = {
  */
 static int __init vga_ball_probe(struct platform_device *pdev)
 {
-    vga_ball_position_t initial_position = { 320, 240 };
+    vga_ball_position_t initial_position = { 50, 50 };
     int ret;
 
 	/* Register ourselves as a misc device: creates /dev/vga_ball */
