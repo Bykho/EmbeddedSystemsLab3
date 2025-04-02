@@ -1,5 +1,5 @@
 
- 
+/*
  * through ioctls
  *
  * Stephen A. Edwards
