@@ -40,10 +40,14 @@ void set_background_color(const vga_ball_color_t *c)
 }
 */
 
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define BALL_SPEED 5
+//#define SCREEN_WIDTH 640
+//#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 578
+#define SCREEN_HEIGHT 418
+#define BALL_SPEED 4
 #define SLEEP_TIME 50000  // 50ms delay between updates
+
+//RADIUS IS 31
 
 int main()
 {
@@ -71,11 +75,11 @@ int main()
         y += dy;
 
         // Bounce off walls
-        if (x >= SCREEN_WIDTH || x <= 0) {
+        if (x >= SCREEN_WIDTH || x <= 31) {
             dx = -dx;  // Reverse X direction
             x += dx;   // Prevent sticking to wall
         }
-        if (y >= SCREEN_HEIGHT || y <= 0) {
+        if (y >= SCREEN_HEIGHT || y <= 31) {
             dy = -dy;  // Reverse Y direction
             y += dy;   // Prevent sticking to wall
         }
