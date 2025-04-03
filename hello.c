@@ -75,7 +75,7 @@ int main()
         y += dy;
 
         // Bounce off walls
-        if (x >= SCREEN_WIDTH || x <= 31) {
+        if (x >= (609) || x <= 31) { // SCREEN_WIDTH
             dx = -dx;  // Reverse X direction
             x += dx;   // Prevent sticking to wall
         }
