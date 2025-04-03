@@ -54,7 +54,7 @@ struct vga_ball_dev {
  */
 static void write_position(vga_ball_position_t *position)
 {
-	iowrite32(position->x, BALL_X(dev.virtbase));
+	iowrite32(position->x, BALL_X(dev.virtbase)); // dev.virtbase gets the location of the registers in hardware.
 	iowrite32(position->y, BALL_Y(dev.virtbase));
 	
 	dev.position = *position;
