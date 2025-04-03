@@ -4,7 +4,7 @@
 #include <linux/ioctl.h>
 
 typedef struct {
-  unsigned int x, y;
+  int x, y;
 } vga_ball_position_t;
   
 
