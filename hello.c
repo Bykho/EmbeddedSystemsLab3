@@ -1,4 +1,3 @@
-
 /*
  * through ioctls
  *
@@ -13,6 +12,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <unistd.h>
+#include <stddef.h>
 #include "vga_ball.h"
 
 /*
@@ -40,50 +40,60 @@ void set_background_color(const vga_ball_color_t *c)
 }
 */
 
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define BALL_SPEED 5
+#define SLEEP_TIME 50000  // 50ms delay between updates
+
 int main()
 {
-  int vga_ball_fd;
-  vga_ball_arg_t vla;
-  static const char filename[] = "/dev/vga_ball";
+    int vga_ball_fd;
+    vga_ball_arg_t vla;
+    static const char filename[] = "/dev/vga_ball";
 
-  printf("VGA ball Userspace program started\n");
+    // Ball position and velocity
+    int x = 100;
+    int y = 100;
+    int dx = BALL_SPEED;  // Start moving right
+    int dy = BALL_SPEED;  // Start moving down
 
-  /*
-  static const vga_ball_color_t colors[] = {
-    { 0xff, 0x00, 0x00 }, //Red 
-    { 0x00, 0xff, 0x00 }, // Green
-    { 0x00, 0x00, 0xff }, // Blue
-    { 0xff, 0xff, 0x00 }, // Yellow
-    { 0x00, 0xff, 0xff }, // Cyan
-    { 0xff, 0x00, 0xff }, // Magenta
-    { 0x80, 0x80, 0x80 }, // Gray
-    { 0x00, 0x00, 0x00 }, // Black
-    { 0xff, 0xff, 0xff }  // White
-  };
-  */
+    printf("VGA ball Userspace program started\n");
 
+    if ((vga_ball_fd = open(filename, O_RDWR)) == -1) {
+        fprintf(stderr, "could not open %s\n", filename);
+        return -1;
+    }
 
-  if ((vga_ball_fd = open(filename, O_RDWR)) == -1) {
-      fprintf(stderr, "could not open %s\n", filename);
-      return -1;
-  }
+    // Main animation loop
+    while (1) {
+        // Update position
+        x += dx;
+        y += dy;
 
-  // Set ball position to center of screen
-  vla.position.x = 30;  // Assuming 640x480 display
-  vla.position.y = 30;
+        // Bounce off walls
+        if (x >= SCREEN_WIDTH || x <= 0) {
+            dx = -dx;  // Reverse X direction
+            x += dx;   // Prevent sticking to wall
+        }
+        if (y >= SCREEN_HEIGHT || y <= 0) {
+            dy = -dy;  // Reverse Y direction
+            y += dy;   // Prevent sticking to wall
+        }
 
-  if (ioctl(vga_ball_fd, VGA_BALL_WRITE_POSITION, &vla)) {
-      perror("ioctl(VGA_BALL_WRITE_POSITION) failed");
-      return -1;
-  }
+        // Update ball position in hardware
+        vla.position.x = x;
+        vla.position.y = y;
 
-  printf("Ball position set to (%d,%d)\n", vla.position.x, vla.position.y);
-    
-  // Keep the program running to maintain the display
-  printf("Press enter to exit...\n");
-  getchar();
+        if (ioctl(vga_ball_fd, VGA_BALL_WRITE_POSITION, &vla)) {
+            perror("ioctl(VGA_BALL_WRITE_POSITION) failed");
+            break;
+        }
 
-  printf("VGA ball userspace program terminating\n");
-  close(vga_ball_fd);
-  return 0;
+        // Small delay to control animation speed
+        usleep(SLEEP_TIME);
+    }
+
+    printf("VGA ball userspace program terminating\n");
+    close(vga_ball_fd);
+    return 0;
 }
