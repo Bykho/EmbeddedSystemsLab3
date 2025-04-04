@@ -74,11 +74,11 @@ int main()
         y += dy;
 
         // Bounce off walls
-        if (x >= (SCREEN_WIDTH - BALL_RADIUS) + 1 || x <= BALL_RADIUS - 2) { 
+        if (x >= (SCREEN_WIDTH - BALL_RADIUS) || x <= BALL_RADIUS) { 
             dx = -dx;  // Reverse X direction
             x += dx;   // Prevent sticking to wall
         }
-        if (y >= (SCREEN_HEIGHT - BALL_RADIUS) + 1 || y <= BALL_RADIUS) {
+        if (y >= (SCREEN_HEIGHT - BALL_RADIUS)|| y <= BALL_RADIUS) {
             dy = -dy;  // Reverse Y direction
             y += dy;   // Prevent sticking to wall
         }
