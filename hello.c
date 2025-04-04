@@ -40,13 +40,11 @@ void set_background_color(const vga_ball_color_t *c)
 }
 */
 
-//#define SCREEN_WIDTH 640
-//#define SCREEN_HEIGHT 480
 #define SCREEN_WIDTH 640 //578
 #define SCREEN_HEIGHT 480
-#define BALL_RADIUS 20
+#define BALL_RADIUS 15
 #define BALL_SPEED 3
-#define SLEEP_TIME 50000  // 50ms delay between updates
+#define SLEEP_TIME 40000  // 50ms delay between updates
 
 //RADIUS IS 31
 
