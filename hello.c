@@ -5,6 +5,7 @@
  * Columbia University
  */
 
+#testing push
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
@@ -40,11 +41,12 @@ void set_background_color(const vga_ball_color_t *c)
 }
 */
 
-#define SCREEN_WIDTH 640 //578
-#define SCREEN_HEIGHT 480
-#define BALL_RADIUS 15
+//#define SCREEN_WIDTH 640
+//#define SCREEN_HEIGHT 480
+#define SCREEN_WIDTH 578
+#define SCREEN_HEIGHT 449
 #define BALL_SPEED 3
-#define SLEEP_TIME 40000  // 50ms delay between updates
+#define SLEEP_TIME 50000  // 50ms delay between updates
 
 //RADIUS IS 31
 
@@ -74,11 +76,11 @@ int main()
         y += dy;
 
         // Bounce off walls
-        if (x >= (SCREEN_WIDTH - BALL_RADIUS) || x <= BALL_RADIUS) { 
+        if (x >= SCREEN_WIDTH || x <= 31) {
             dx = -dx;  // Reverse X direction
             x += dx;   // Prevent sticking to wall
         }
-        if (y >= (SCREEN_HEIGHT - BALL_RADIUS)|| y <= BALL_RADIUS) {
+        if (y >= SCREEN_HEIGHT || y <= 31) {
             dy = -dy;  // Reverse Y direction
             y += dy;   // Prevent sticking to wall
         }
