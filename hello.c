@@ -46,7 +46,7 @@ void set_background_color(const vga_ball_color_t *c)
 #define SCREEN_WIDTH 578
 #define SCREEN_HEIGHT 449
 #define BALL_SPEED 3
-#define SLEEP_TIME 50000  // 50ms delay between updates
+#define SLEEP_TIME 50000 //50ms delay between updates
 
 //RADIUS IS 31
 
@@ -57,10 +57,16 @@ int main()
     static const char filename[] = "/dev/vga_ball";
 
     // Ball position and velocity
-    int x = 100;
-    int y = 100;
-    int dx = BALL_SPEED;  // Start moving right
-    int dy = BALL_SPEED;  // Start moving down
+
+    float theta = 1;
+
+    int LineMatrix[256][2];
+    for (int i = 0; i < 256; i++) {
+        LineMatrix[i][0] = 0;
+        LineMatrix[i][1] = 0;
+    }
+
+    int delta = 5;
 
     printf("VGA ball Userspace program started\n");
 
@@ -72,19 +78,30 @@ int main()
     // Main animation loop
     while (1) {
         // Update position
-        x += dx;
-        y += dy;
-
-        // Bounce off walls
-        if (x >= SCREEN_WIDTH || x <= 31) {
-            dx = -dx;  // Reverse X direction
-            x += dx;   // Prevent sticking to wall
+        if (theta % 178 == 0) {
+            theta = 0;
+        } else {
+            theta += 1;
         }
-        if (y >= SCREEN_HEIGHT || y <= 31) {
-            dy = -dy;  // Reverse Y direction
-            y += dy;   // Prevent sticking to wall
-        }
+        
+        int max_y = (int) (256 * sin(theta * 3.14159265 / 180.0));
 
+        for (int  y= 0; y < 256; y++) {
+            if (y < max_y) {
+                // cosine of theta times the number of x values we have, times the x value we are on.
+                int virtual_x = ((float) (float(256)/float(max_y))) * y;
+
+                LineMatrix[y][0] = (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
+                LineMatrix[y][1] = (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
+            } else {
+                LineMatrix[y][0] = 8888;
+                LineMatrix[y][1] = 8888;
+            }
+        }
+        
+
+        usleep(SLEEP_TIME);
+    }
         // Update ball position in hardware
         vla.position.x = x;
         vla.position.y = y;
