@@ -94,7 +94,7 @@ int main()
         printf("DEBUG: max_y calculated: %d\n", max_y);
 
         int y;
-        for (y = 0; y < 640; y++) {
+        for (y = 0; y < 3; y++) {
             if (y < max_y) {
                 // cosine of theta times the number of x values we have, times the x value we are on.
                 int virtual_x = ((float) (float)256/(float)(max_y)) * y;
