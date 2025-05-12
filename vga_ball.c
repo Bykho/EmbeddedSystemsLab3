@@ -45,7 +45,8 @@
 struct vga_ball_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
-        vga_ball_position_t position;
+    vga_ball_position_t position;
+	int LineMatrix[256][2];
 } dev;
 
 /*
@@ -60,6 +61,24 @@ static void write_position(vga_ball_position_t *position)
 	dev.position = *position;
 }
 
+// Add a new function to write the line matrix
+static void write_line_matrix(int LineMatrix[256][2])
+{
+    // You need to define a register offset for the LineMatrix data
+    // For example, if your hardware has a register at offset 8 for line data:
+    #define LINE_MATRIX_BASE(x) ((x)+8)
+    
+    // Write each value to hardware
+    for (int i = 0; i < 256; i++) {
+        // Assuming each line entry takes 8 bytes (4 for each value)
+        iowrite32(LineMatrix[i][0], LINE_MATRIX_BASE(dev.virtbase) + (i * 8));
+        iowrite32(LineMatrix[i][1], LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
+    }
+    
+    // Store the line matrix in our device struct
+    memcpy(dev.LineMatrix, LineMatrix, sizeof(dev.LineMatrix));
+}
+
 /*
  * Handle ioctl() calls from userspace:
  * Read or write the segments on single digits.
@@ -68,7 +87,8 @@ static void write_position(vga_ball_position_t *position)
 static long vga_ball_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 {
 	vga_ball_arg_t vla;
-
+	vga_ball_line_t vla_line;
+	
 	switch (cmd) {
 	case VGA_BALL_WRITE_POSITION:
 		if (copy_from_user(&vla, (vga_ball_arg_t *) arg, sizeof(vga_ball_arg_t)))
@@ -80,6 +100,12 @@ static long vga_ball_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 	  	vla.position = dev.position;
         if (copy_to_user((vga_ball_arg_t *) arg, &vla, sizeof(vga_ball_arg_t)))
 			return -EACCES;
+		break;
+
+	case VGA_BALL_WRITE_LINE:
+		if (copy_from_user(&vla_line, (vga_ball_line_t *) arg, sizeof(vga_ball_line_t)))
+			return -EACCES;
+		write_line_matrix(vla_line.LineMatrix);
 		break;
 
 	default:

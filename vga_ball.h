@@ -9,7 +9,12 @@ typedef struct {
   
 
 typedef struct {
+  int LineMatrix[256][2];
+} vga_ball_line_t;
+
+typedef struct {
   vga_ball_position_t position;
+  vga_ball_line_t line;
 } vga_ball_arg_t;
 
 #define VGA_BALL_MAGIC 'q'
@@ -17,5 +22,6 @@ typedef struct {
 /* ioctls and their arguments */
 #define VGA_BALL_WRITE_POSITION _IOW(VGA_BALL_MAGIC, 1, vga_ball_arg_t)
 #define VGA_BALL_READ_POSITION  _IOR(VGA_BALL_MAGIC, 2, vga_ball_arg_t)
+#define VGA_BALL_WRITE_LINE _IOW(VGA_BALL_MAGIC, 3, vga_ball_line_t)
 
 #endif

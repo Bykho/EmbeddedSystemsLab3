@@ -14,6 +14,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <math.h>
 #include "vga_ball.h"
 
 /*
@@ -53,20 +54,20 @@ void set_background_color(const vga_ball_color_t *c)
 int main()
 {
     int vga_ball_fd;
-    vga_ball_arg_t vla;
+    vga_ball_line_t vla_line;
     static const char filename[] = "/dev/vga_ball";
 
     // Ball position and velocity
 
     float theta = 1;
+    int delta = 5;
+
 
     int LineMatrix[256][2];
     for (int i = 0; i < 256; i++) {
-        LineMatrix[i][0] = 0;
-        LineMatrix[i][1] = 0;
+        LineMatrix[i][0] = 240;
+        LineMatrix[i][1] = 240;
     }
-
-    int delta = 5;
 
     printf("VGA ball Userspace program started\n");
 
@@ -78,36 +79,32 @@ int main()
     // Main animation loop
     while (1) {
         // Update position
-        if (theta % 178 == 0) {
-            theta = 0;
+        if (theta >= 178) {
+            theta = 1;
         } else {
             theta += 1;
         }
         
         int max_y = (int) (256 * sin(theta * 3.14159265 / 180.0));
 
-        for (int  y= 0; y < 256; y++) {
+        for (int  y = 0; y < 256; y++) {
             if (y < max_y) {
                 // cosine of theta times the number of x values we have, times the x value we are on.
-                int virtual_x = ((float) (float(256)/float(max_y))) * y;
+                int virtual_x = ((float) (float)256/(float)(max_y)) * y;
 
-                LineMatrix[y][0] = (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
-                LineMatrix[y][1] = (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
+                LineMatrix[y][0] = 240 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
+                LineMatrix[y][1] = 240 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
             } else {
-                LineMatrix[y][0] = 8888;
-                LineMatrix[y][1] = 8888;
+                LineMatrix[y][0] = -1;
+                LineMatrix[y][1] = -1;
             }
         }
-        
 
-        usleep(SLEEP_TIME);
-    }
-        // Update ball position in hardware
-        vla.position.x = x;
-        vla.position.y = y;
+        memcpy(vla_line.LineMatrix, LineMatrix, sizeof(LineMatrix));
 
-        if (ioctl(vga_ball_fd, VGA_BALL_WRITE_POSITION, &vla)) {
-            perror("ioctl(VGA_BALL_WRITE_POSITION) failed");
+
+        if (ioctl(vga_ball_fd, VGA_BALL_WRITE_LINE, &vla_line)) {
+            perror("ioctl(VGA_BALL_WRITE_LINE) failed");
             break;
         }
 
