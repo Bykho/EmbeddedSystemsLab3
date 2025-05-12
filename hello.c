@@ -1,6 +1,4 @@
-/*
- * through ioctls
- *
+*
  * Stephen A. Edwards
  * Columbia University
  */
