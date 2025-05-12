@@ -98,8 +98,8 @@ int main()
                 // cosine of theta times the number of x values we have, times the x value we are on.
                 int virtual_x = ((float) (float)256/(float)(max_y)) * y;
 
-                LineMatrix[y][0] = 320 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
-                LineMatrix[y][1] = 320 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
+                LineMatrix[y][0] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
+                LineMatrix[y][1] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
                 if (y % 10 == 0) {
                     printf("DEBUG: LineMatrix[%d] values: [%d, %d]\n", y, LineMatrix[y][0], LineMatrix[y][1]);
                 }
