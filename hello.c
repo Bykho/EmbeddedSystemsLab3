@@ -1,4 +1,4 @@
-*
+/*
  * Stephen A. Edwards
  * Columbia University
  */
