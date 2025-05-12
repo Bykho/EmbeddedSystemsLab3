@@ -103,10 +103,7 @@ int main()
                 if (y % 10 == 0) {
                     printf("DEBUG: LineMatrix[%d] values: [%d, %d]\n", y, LineMatrix[y][0], LineMatrix[y][1]);
                 }
-            } else {
-                LineMatrix[y][0] = -1;
-                LineMatrix[y][1] = -1;
-            }
+            } 
         }
 
         memcpy(vla_line.LineMatrix, LineMatrix, sizeof(LineMatrix));
