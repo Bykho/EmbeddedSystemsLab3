@@ -52,7 +52,8 @@ struct vga_ball_dev {
 
 static void read_line_matrix(int out[256][2])
 {
-  for (int i = 0; i < 256; i++) {
+  int i;
+  for (i = 0; i < 256; i++) {
     /* each entry is two 32-bit words, at offsets 8..2055 */
     out[i][0] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8)    );
     out[i][1] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
@@ -79,7 +80,8 @@ static void write_line_matrix(int LineMatrix[256][2])
     #define LINE_MATRIX_BASE(x) ((x)+8)
     
     // Write each value to hardware
-    for (int i = 0; i < 256; i++) {
+	int i;
+    for (i = 0; i < 256; i++) {
         // Assuming each line entry takes 8 bytes (4 for each value)
         iowrite32(LineMatrix[i][0], LINE_MATRIX_BASE(dev.virtbase) + (i * 8));
         iowrite32(LineMatrix[i][1], LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
