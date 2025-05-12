@@ -15,8 +15,7 @@ default: module hello
 module:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules
 
-# Add the -lm flag to link with the math library
-hello: hello.c
+hello:
 	$(CC) -o hello hello.c -lm
 
 clean:
