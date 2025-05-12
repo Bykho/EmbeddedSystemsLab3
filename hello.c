@@ -88,7 +88,8 @@ int main()
         
         int max_y = (int) (256 * sin(theta * 3.14159265 / 180.0));
 
-        for (int  y = 0; y < 640; y++) {
+        int y;
+        for (y = 0; y < 640; y++) {
             if (y < max_y) {
                 // cosine of theta times the number of x values we have, times the x value we are on.
                 int virtual_x = ((float) (float)256/(float)(max_y)) * y;
