@@ -38,7 +38,7 @@
 /* Device registers */
 #define BALL_X(x) (x)
 #define BALL_Y(x) ((x)+4)
-
+#define LINE_MATRIX_BASE(x) ((x) + 8)
 /*
  * Information about our device
  */
@@ -48,6 +48,16 @@ struct vga_ball_dev {
     vga_ball_position_t position;
 	int LineMatrix[256][2];
 } dev;
+
+
+static void read_line_matrix(int out[256][2])
+{
+  for (int i = 0; i < 256; i++) {
+    /* each entry is two 32-bit words, at offsets 8..2055 */
+    out[i][0] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8)    );
+    out[i][1] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
+  }
+}
 
 /*
  * Write segments of a single digit
@@ -74,7 +84,6 @@ static void write_line_matrix(int LineMatrix[256][2])
         iowrite32(LineMatrix[i][0], LINE_MATRIX_BASE(dev.virtbase) + (i * 8));
         iowrite32(LineMatrix[i][1], LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
     }
-    
     // Store the line matrix in our device struct
     memcpy(dev.LineMatrix, LineMatrix, sizeof(dev.LineMatrix));
 }
@@ -107,6 +116,13 @@ static long vga_ball_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 			return -EACCES;
 		write_line_matrix(vla_line.LineMatrix);
 		break;
+
+    case VGA_BALL_READ_LINE:  /* new */
+      /* pull live values out of the hardware into vla_line.LineMatrix */
+      read_line_matrix(vla_line.LineMatrix);
+      if (copy_to_user((vga_ball_line_t *)arg, &vla_line, sizeof(vla_line)))
+        return -EACCES;
+      break;
 
 	default:
 		return -EINVAL;

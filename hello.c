@@ -64,7 +64,8 @@ int main()
 
 
     int LineMatrix[256][2];
-    for (int i = 0; i < 256; i++) {
+    int i;
+    for (i = 0; i < 256; i++) {
         LineMatrix[i][0] = 240;
         LineMatrix[i][1] = 240;
     }
@@ -87,7 +88,7 @@ int main()
         
         int max_y = (int) (256 * sin(theta * 3.14159265 / 180.0));
 
-        for (int  y = 0; y < 256; y++) {
+        for (int  y = 0; y < 640; y++) {
             if (y < max_y) {
                 // cosine of theta times the number of x values we have, times the x value we are on.
                 int virtual_x = ((float) (float)256/(float)(max_y)) * y;
