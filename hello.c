@@ -65,8 +65,8 @@ int main()
     int LineMatrix[256][2];
     int i;
     for (i = 0; i < 256; i++) {
-        LineMatrix[i][0] = 240;
-        LineMatrix[i][1] = 240;
+        LineMatrix[i][0] = 320;
+        LineMatrix[i][1] = 320;
     }
     printf("DEBUG: LineMatrix initialized\n");
 
@@ -90,13 +90,13 @@ int main()
             theta += 1;
         }
         
-        int max_y = (int) (256 * sin(theta * 3.14159265 / 180.0));
+        int number_elements = (int) (256 * sin(theta * 3.14159265 / 180.0));
 
         int y;
         for (y = 0; y < 480; y++) {
-            if (y < max_y) {
+            if (y < number_elements) {
                 // cosine of theta times the number of x values we have, times the x value we are on.
-                int virtual_x = ((float) (float)256/(float)(max_y)) * y;
+                int virtual_x = ((float) (float)256/(float)(number_elements)) * y;
 
                 LineMatrix[y][0] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
                 LineMatrix[y][1] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
