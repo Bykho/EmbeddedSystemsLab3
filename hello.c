@@ -100,8 +100,8 @@ int main()
                 int virtual_x = ((float) (float)256/(float)(max_y)) * y;
                 printf("DEBUG: Processing y=%d, virtual_x=%d\n", y, virtual_x);
 
-                LineMatrix[y][0] = 240 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
-                LineMatrix[y][1] = 240 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
+                LineMatrix[y][0] = 320 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
+                LineMatrix[y][1] = 320 + (int) (((float) (256 * cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
                 
                 printf("DEBUG: LineMatrix[%d] values: [%d, %d]\n", y, LineMatrix[y][0], LineMatrix[y][1]);
             } else {
