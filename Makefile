@@ -15,6 +15,8 @@ default: module hello
 module:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules
 
+hello:
+	$(CC) -o hello hello.c -lm
 
 clean:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} clean
