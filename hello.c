@@ -1,10 +1,5 @@
-/*
- * Stephen A. Edwards
- * Columbia University
- */
-
-//testing push
 #include <stdio.h>
+#include <stdint.h>        // for uint32_t
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -15,131 +10,111 @@
 #include <math.h>
 #include <stdbool.h>
 #include "vga_ball.h"
+#include "ultrasonic_sensor.h"
 
-/*
-// Read and print the background color 
-void print_background_color() {
-  vga_ball_arg_t vla;
-  
-  if (ioctl(vga_ball_fd, VGA_BALL_READ_BACKGROUND, &vla)) {
-      perror("ioctl(VGA_BALL_READ_BACKGROUND) failed");
-      return;
-  }
-  printf("%02x %02x %02x\n",
-	 vla.background.red, vla.background.green, vla.background.blue);
-}
+#define SCREEN_WIDTH   640
+#define SCREEN_HEIGHT  480
+#define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
+#define SLEEP_TIME     50000  // 50ms delay between updates
 
-// Set the background color 
-void set_background_color(const vga_ball_color_t *c)
-{
-  vga_ball_arg_t vla;
-  vla.background = *c;
-  if (ioctl(vga_ball_fd, VGA_BALL_WRITE_BACKGROUND, &vla)) {
-      perror("ioctl(VGA_BALL_SET_BACKGROUND) failed");
-      return;
-  }
-}
-*/
+int main(void) {
+    int  vga_ball_fd, us_fd;
+    vga_ball_line_t   vla_line;
+    const char       *vga_dev = "/dev/vga_ball";
+    float             theta  = 1.0f;
+    bool              clockWise = true;
+    uint16_t          chirp = 0;            // current chirp bit
+    int               angle;
 
-//#define SCREEN_WIDTH 640
-//#define SCREEN_HEIGHT 480
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-#define SLEEP_TIME 50000 //50ms delay between updates
-
-
-int main()
-{
-    printf("DEBUG: Starting main()\n");
-    
-    int vga_ball_fd;
-    vga_ball_line_t vla_line;
-    static const char filename[] = "/dev/vga_ball";
-
-    // Ball position and velocity
-    float theta = 1;
-    int delta = 5;
-
-    printf("DEBUG: Initializing LineMatrix\n");
-    int LineMatrix[256][2];  // Changed to match screen height
-    int i;
-    for (i = 0; i < 256; i++) {
-        LineMatrix[i][0] = 320;
-        LineMatrix[i][1] = 320;
+    // Open VGA device
+    if ((vga_ball_fd = open(vga_dev, O_RDWR)) < 0) {
+        perror("open vga_ball");
+        return 1;
     }
-    printf("DEBUG: LineMatrix initialized\n");
 
-    printf("VGA ball Userspace program started\n");
-
-    printf("DEBUG: Attempting to open device file: %s\n", filename);
-    if ((vga_ball_fd = open(filename, O_RDWR)) == -1) {
-        fprintf(stderr, "could not open %s\n", filename);
-        return -1;
+    // Open ultrasonic device
+    if ((us_fd = open("/dev/ultrasonic_sensor", O_RDWR)) < 0) {
+        perror("open ultrasonic_sensor");
+        close(vga_ball_fd);
+        return 1;
     }
-    printf("DEBUG: Device file opened successfully\n");
 
-    // Main animation loop
-    printf("DEBUG: Entering main loop\n");
-    bool clockWise = true;
+    // Pre-fill line matrix
+    int LineMatrix[VGA_BUFFER_HEIGHT][2];
+    for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
+        LineMatrix[y][0] = SCREEN_WIDTH/2;
+        LineMatrix[y][1] = SCREEN_WIDTH/2;
+    }
 
+    // Main loop
     while (1) {
-        printf("DEBUG: Loop iteration start, theta = %f\n", theta);
-        // Update position
-        if (theta >= 178) {
-            clockWise = false;
-        } else if (theta <= 1) {
-            clockWise = true;
+        // Update theta
+        if (theta >= 178.0f) clockWise = false;
+        else if (theta <= 1.0f) clockWise = true;
+        theta += (clockWise ? +1.0f : -1.0f);
+
+        // Convert and clamp to int
+        angle = (int)roundf(theta);
+
+        // Update chirp state at 2° and 177°
+        if (angle == 2) {
+            chirp = 1;
+        } else if (angle == 177) {
+            chirp = 0;
         }
 
-        if (clockWise) {
-            theta += 1;
-        } else {
-            theta -= 1;
+        // Pack 32-bit config: [31:16]=angle, [15:0]=chirp
+        uint32_t cfg = ((uint32_t)angle << 16) | (chirp & 0xFFFF);
+        if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
+            perror("US_WRITE_CONFIG failed");
+            break;
         }
-        
-        int number_elements = (int) (256 * sin(theta * 3.14159265 / 180.0));
-        if (number_elements < 0) number_elements = 0;  // Ensure non-negative
-        if (number_elements > 256) number_elements = 256;  // Cap at max line height
 
-        int y;
-        for (y = 0; y < 256; y++) {
-            if (y < number_elements) {
-                // Ensure number_elements is not zero to avoid division by zero
-                int virtual_x = number_elements > 0 ? ((float)256/(float)number_elements) * y : 0;
-                
-                // Ensure virtual_x stays within bounds
-                if (virtual_x > 255) virtual_x = 255;
-                
-                LineMatrix[y][0] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
-                LineMatrix[y][1] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
-                
-                // Ensure the line coordinates stay within screen bounds
-                if (LineMatrix[y][0] < 0) LineMatrix[y][0] = 0;
-                if (LineMatrix[y][1] >= SCREEN_WIDTH) LineMatrix[y][1] = SCREEN_WIDTH - 1;
-                
-                if (y % 10 == 0) {
-                    printf("DEBUG: LineMatrix[%d] values: [%d, %d]\n", y, LineMatrix[y][0], LineMatrix[y][1]);
-                }
+        // Every 10°, read and print status
+        if (angle % 10 == 0) {
+            uint32_t status;
+            if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
+                perror("US_READ_STATUS failed");
+                break;
+            }
+            printf("Echo status @ %3d° = 0x%08x\n", angle, status);
+        }
+
+        // Compute line geometry
+        int num = (int)(SCREEN_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
+        if (num < 0) num = 0;
+        if (num > SCREEN_HEIGHT) num = SCREEN_HEIGHT;
+
+        for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
+            if (y < num) {
+                int vx = (num > 0)
+                    ? (int)(((float)SCREEN_HEIGHT / num) * y)
+                    : 0;
+                int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - 5;
+                int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + 5;
+                // Clamp
+                if (x0 < 0) x0 = 0;
+                if (x1 >= SCREEN_WIDTH) x1 = SCREEN_WIDTH - 1;
+                LineMatrix[y][0] = x0;
+                LineMatrix[y][1] = x1;
             } else {
                 LineMatrix[y][0] = -1;
                 LineMatrix[y][1] = -1;
             }
         }
 
+        // Draw to VGA
         memcpy(vla_line.LineMatrix, LineMatrix, sizeof(LineMatrix));
-
-        if (ioctl(vga_ball_fd, VGA_BALL_WRITE_LINE, &vla_line)) {
-            perror("ioctl(VGA_BALL_WRITE_LINE) failed");
-            printf("DEBUG: ioctl failed\n");
+        if (ioctl(vga_ball_fd, VGA_BALL_WRITE_LINE, &vla_line) < 0) {
+            perror("VGA_BALL_WRITE_LINE failed");
             break;
         }
 
-        // Small delay to control animation speed
         usleep(SLEEP_TIME);
     }
 
-    printf("VGA ball userspace program terminating\n");
-    printf("DEBUG: Closing file descriptor\n");
+    // Cleanup
+    close(us_fd);
     close(vga_ball_fd);
     return 0;
 }
