@@ -94,7 +94,3 @@ static void __exit ultrasonic_exit(void)
 
 module_init(ultrasonic_init);
 module_exit(ultrasonic_exit);
-
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Nico Bykhovsky");
-MODULE_DESCRIPTION("Ultrasonic sensor kernel driver");
