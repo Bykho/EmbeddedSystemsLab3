@@ -26,4 +26,4 @@
 /* Device name */
 #define ULTRASONIC_DEV_NAME  "ultrasonic_sensor"
 
-#endif /* ULTRASONIC_SENSOR_H */
+#endif
