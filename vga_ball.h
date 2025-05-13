@@ -9,7 +9,7 @@ typedef struct {
   
 
 typedef struct {
-  int LineMatrix[128][2];
+  int LineMatrix[256][2];
 } vga_ball_line_t;
 
 typedef struct {

@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <math.h>
+#include <stdbool.h>
 #include "vga_ball.h"
 
 /*
@@ -44,10 +45,8 @@ void set_background_color(const vga_ball_color_t *c)
 //#define SCREEN_HEIGHT 480
 #define SCREEN_WIDTH 640
 #define SCREEN_HEIGHT 480
-#define BALL_SPEED 3
 #define SLEEP_TIME 50000 //50ms delay between updates
 
-//RADIUS IS 31
 
 int main()
 {
@@ -62,9 +61,9 @@ int main()
     int delta = 5;
 
     printf("DEBUG: Initializing LineMatrix\n");
-    int LineMatrix[128][2];  // Changed to match screen height
+    int LineMatrix[256][2];  // Changed to match screen height
     int i;
-    for (i = 0; i < 128; i++) {
+    for (i = 0; i < 256; i++) {
         LineMatrix[i][0] = 320;
         LineMatrix[i][1] = 320;
     }
@@ -81,24 +80,32 @@ int main()
 
     // Main animation loop
     printf("DEBUG: Entering main loop\n");
+    bool clockWise = true;
+
     while (1) {
         printf("DEBUG: Loop iteration start, theta = %f\n", theta);
         // Update position
         if (theta >= 178) {
-            theta = 1;
-        } else {
+            clockWise = false;
+        } else if (theta <= 1) {
+            clockWise = true;
+        }
+
+        if (clockWise) {
             theta += 1;
+        } else {
+            theta -= 1;
         }
         
-        int number_elements = (int) (128 * sin(theta * 3.14159265 / 180.0));
+        int number_elements = (int) (256 * sin(theta * 3.14159265 / 180.0));
         if (number_elements < 0) number_elements = 0;  // Ensure non-negative
-        if (number_elements > 128) number_elements = 128;  // Cap at max line height
+        if (number_elements > 256) number_elements = 256;  // Cap at max line height
 
         int y;
-        for (y = 0; y < 128; y++) {
+        for (y = 0; y < 256; y++) {
             if (y < number_elements) {
                 // Ensure number_elements is not zero to avoid division by zero
-                int virtual_x = number_elements > 0 ? ((float)128/(float)number_elements) * y : 0;
+                int virtual_x = number_elements > 0 ? ((float)256/(float)number_elements) * y : 0;
                 
                 // Ensure virtual_x stays within bounds
                 if (virtual_x > 255) virtual_x = 255;
