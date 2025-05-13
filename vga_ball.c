@@ -77,7 +77,6 @@ static void write_line_matrix(int LineMatrix[128][2])
 {
     // You need to define a register offset for the LineMatrix data
     // For example, if your hardware has a register at offset 8 for line data:
-    #define LINE_MATRIX_BASE(x) ((x)+8)
     
     // Write each value to hardware
 	int i;
