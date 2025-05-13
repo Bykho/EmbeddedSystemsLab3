@@ -62,9 +62,9 @@ int main()
     int delta = 5;
 
     printf("DEBUG: Initializing LineMatrix\n");
-    int LineMatrix[256][2];
+    int LineMatrix[480][2];  // Changed to match screen height
     int i;
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < 480; i++) {
         LineMatrix[i][0] = 320;
         LineMatrix[i][1] = 320;
     }
@@ -91,19 +91,32 @@ int main()
         }
         
         int number_elements = (int) (256 * sin(theta * 3.14159265 / 180.0));
+        if (number_elements < 0) number_elements = 0;  // Ensure non-negative
+        if (number_elements > 480) number_elements = 480;  // Cap at screen height
 
         int y;
         for (y = 0; y < 480; y++) {
             if (y < number_elements) {
-                // cosine of theta times the number of x values we have, times the x value we are on.
-                int virtual_x = ((float) (float)256/(float)(number_elements)) * y;
-
+                // Ensure number_elements is not zero to avoid division by zero
+                int virtual_x = number_elements > 0 ? ((float)256/(float)number_elements) * y : 0;
+                
+                // Ensure virtual_x stays within bounds
+                if (virtual_x > 255) virtual_x = 255;
+                
                 LineMatrix[y][0] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) - delta;
                 LineMatrix[y][1] = 320 + (int) (((float) (cos(theta * 3.14159265 / 180.0))) * virtual_x) + delta;
+                
+                // Ensure the line coordinates stay within screen bounds
+                if (LineMatrix[y][0] < 0) LineMatrix[y][0] = 0;
+                if (LineMatrix[y][1] >= SCREEN_WIDTH) LineMatrix[y][1] = SCREEN_WIDTH - 1;
+                
                 if (y % 10 == 0) {
                     printf("DEBUG: LineMatrix[%d] values: [%d, %d]\n", y, LineMatrix[y][0], LineMatrix[y][1]);
                 }
-            } 
+            } else {
+                LineMatrix[y][0] = -1;
+                LineMatrix[y][1] = -1;
+            }
         }
 
         memcpy(vla_line.LineMatrix, LineMatrix, sizeof(LineMatrix));
