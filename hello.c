@@ -62,9 +62,9 @@ int main()
     int delta = 5;
 
     printf("DEBUG: Initializing LineMatrix\n");
-    int LineMatrix[480][2];  // Changed to match screen height
+    int LineMatrix[128][2];  // Changed to match screen height
     int i;
-    for (i = 0; i < 480; i++) {
+    for (i = 0; i < 128; i++) {
         LineMatrix[i][0] = 320;
         LineMatrix[i][1] = 320;
     }
@@ -90,15 +90,15 @@ int main()
             theta += 1;
         }
         
-        int number_elements = (int) (256 * sin(theta * 3.14159265 / 180.0));
+        int number_elements = (int) (128 * sin(theta * 3.14159265 / 180.0));
         if (number_elements < 0) number_elements = 0;  // Ensure non-negative
-        if (number_elements > 480) number_elements = 480;  // Cap at screen height
+        if (number_elements > 128) number_elements = 128;  // Cap at max line height
 
         int y;
-        for (y = 0; y < 480; y++) {
+        for (y = 0; y < 128; y++) {
             if (y < number_elements) {
                 // Ensure number_elements is not zero to avoid division by zero
-                int virtual_x = number_elements > 0 ? ((float)256/(float)number_elements) * y : 0;
+                int virtual_x = number_elements > 0 ? ((float)128/(float)number_elements) * y : 0;
                 
                 // Ensure virtual_x stays within bounds
                 if (virtual_x > 255) virtual_x = 255;

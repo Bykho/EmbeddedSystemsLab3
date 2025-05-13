@@ -46,14 +46,14 @@ struct vga_ball_dev {
 	struct resource res; /* Resource: our registers */
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
     vga_ball_position_t position;
-	int LineMatrix[480][2];
+	int LineMatrix[128][2];
 } dev;
 
 
-static void read_line_matrix(int out[480][2])
+static void read_line_matrix(int out[128][2])
 {
   int i;
-  for (i = 0; i < 480; i++) {
+  for (i = 0; i < 128; i++) {
     /* each entry is two 32-bit words, at offsets 8..2055 */
     out[i][0] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8)    );
     out[i][1] = ioread32(LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
@@ -73,7 +73,7 @@ static void write_position(vga_ball_position_t *position)
 }
 
 // Add a new function to write the line matrix
-static void write_line_matrix(int LineMatrix[480][2])
+static void write_line_matrix(int LineMatrix[128][2])
 {
     // You need to define a register offset for the LineMatrix data
     // For example, if your hardware has a register at offset 8 for line data:
@@ -81,7 +81,7 @@ static void write_line_matrix(int LineMatrix[480][2])
     
     // Write each value to hardware
 	int i;
-    for (i = 0; i < 480; i++) {
+    for (i = 0; i < 128; i++) {
         // Assuming each line entry takes 8 bytes (4 for each value)
         iowrite32(LineMatrix[i][0], LINE_MATRIX_BASE(dev.virtbase) + (i * 8));
         iowrite32(LineMatrix[i][1], LINE_MATRIX_BASE(dev.virtbase) + (i * 8) + 4);
