@@ -9,13 +9,29 @@
 #include <stddef.h>
 #include <math.h>
 #include <stdbool.h>
+#include <pthread.h>       // Add pthread header
 #include "vga_ball.h"
 #include "ultrasonic_sensor.h"
 
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
-#define SLEEP_TIME     500000  // 50ms delay between updates
+#define SLEEP_TIME     500000  // 500ms delay between updates
+
+// Thread function for ultrasonic sensor status reading
+void *read_us_status(void *arg) {
+    int *us_fd_ptr = (int *)arg;
+    uint32_t status;
+    while (1) {
+        if (ioctl(*us_fd_ptr, US_READ_STATUS, &status) < 0) {
+            perror("US_READ_STATUS failed in thread");
+            pthread_exit(NULL);
+        }
+        printf("Echo status in thread = 0x%08x\n", status);
+        usleep(500000); // Sleep for 500ms between reads
+    }
+    return NULL;
+}
 
 int main(void) {
     int  vga_ball_fd, us_fd;
@@ -25,6 +41,8 @@ int main(void) {
     bool              clockWise = true;
     uint16_t          chirp = 0;            // current chirp bit
     int               angle;
+    pthread_t         us_thread;
+    int               thread_running = 0;
 
     // Open VGA device
     if ((vga_ball_fd = open(vga_dev, O_RDWR)) < 0) {
@@ -46,6 +64,14 @@ int main(void) {
         LineMatrix[y][1] = SCREEN_WIDTH/2;
     }
 
+    // Start the thread and pass ultrasonic sensor file descriptor
+    if (pthread_create(&us_thread, NULL, read_us_status, &us_fd) != 0) {
+        perror("Failed to create ultrasonic sensor thread");
+        close(us_fd);
+        return 1;
+    }
+    thread_running = 1;
+
     // Main loop
     while (1) {
         // Update theta
@@ -56,16 +82,15 @@ int main(void) {
         // Convert and clamp to int
         angle = (int)roundf(theta);
 
-        // Update chirp state at 2° and 177°
+        // Update chirp state at specific angles
         if (angle == 6) {
-            chirp = 999;
+            chirp = 1;  // Using 1 directly, as only bit 0 is used
         } else if (angle == 174) {
             chirp = 0;
         }
 
         // Pack 32-bit config: [31:16]=time, [15:0]=chirp
-        // 3000000 nanoseconds = 60 milliseconds
-        uint16_t timeout = 65535;
+        uint16_t timeout = 65535;  // Max 16-bit value
         uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
         printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
         if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
@@ -73,8 +98,8 @@ int main(void) {
             break;
         }
 
-        // Every 10°, read and print status
-        if (angle % 10 == 0) {
+        // Every 2°, read and print status from main thread
+        if (angle % 2 == 0) {
             uint32_t status;
             if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
                 perror("US_READ_STATUS failed");
@@ -83,15 +108,10 @@ int main(void) {
             printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
         }
 
-
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
-
-
-
 
         // Compute line geometry
         int num = (int)(VGA_BUFFER_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
-
 
         if (num < 0) num = 0;
         if (num > SCREEN_HEIGHT) num = SCREEN_HEIGHT;
@@ -103,7 +123,6 @@ int main(void) {
                     : 0;
                 int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - (2 + AngleDistanceFrom90);
                 int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + (2 + AngleDistanceFrom90);
-
 
                 // Clamp
                 if (x0 < 0) x0 = 0;
@@ -127,7 +146,13 @@ int main(void) {
     }
 
     // Cleanup
+    if (thread_running) {
+        pthread_cancel(us_thread);  // Cancel the thread
+        pthread_join(us_thread, NULL);  // Wait for it to terminate
+    }
     close(us_fd);
     close(vga_ball_fd);
     return 0;
 }
+
+
