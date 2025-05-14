@@ -34,8 +34,6 @@ static void read_status(uint32_t *status)
     printk(KERN_INFO "status%d...\n", *status);
 }
 
-
-
 static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
     __u32 val;
