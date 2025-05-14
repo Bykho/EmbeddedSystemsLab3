@@ -7,7 +7,7 @@
 
 #include "ultrasonic_sensor.h"
 
-#define ULTRASONIC_BASE_PHYS  0xFF200000  /* adjust to your Qsys base */
+#define ULTRASONIC_BASE_PHYS  0xFF300000  /* adjust to your Qsys base */
 #define ULTRASONIC_REG_SIZE   0x4         /* one 32-bit register */
 
 static void __iomem *us_base;
