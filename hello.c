@@ -81,14 +81,14 @@ int main(void) {
         }
 
         // Compute line geometry
-        int num = (int)(SCREEN_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
+        int num = (int)(VGA_BUFFER_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
         if (num < 0) num = 0;
         if (num > SCREEN_HEIGHT) num = SCREEN_HEIGHT;
 
         for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
             if (y < num) {
                 int vx = (num > 0)
-                    ? (int)(((float)SCREEN_HEIGHT / num) * y)
+                    ? (int)(((float)VGA_BUFFER_HEIGHT / num) * y)
                     : 0;
                 int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - 5;
                 int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + 5;
