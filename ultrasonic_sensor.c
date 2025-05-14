@@ -17,8 +17,8 @@
 #define ULTRASONIC_BASE_PHYS  0xFF300000  /* adjust to your Qsys base */
 #define ULTRASONIC_REG_SIZE   0x4         /* one 32-bit register */
 #define DRIVER_NAME "ultrasonic_sensor"
-#define STATUS(x) (x + 4)
-#define CHIRP_TIMEOUT_DATA(x) (x)
+#define STATUS(x) (x + 4) // x + 4
+#define CHIRP_TIMEOUT_DATA(x) (x)// + 8)
 
 //static void __iomem *us_base;
 
