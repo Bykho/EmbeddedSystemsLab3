@@ -1,6 +1,7 @@
 #ifndef ULTRASONIC_SENSOR_H
 #define ULTRASONIC_SENSOR_H
 
+#include <stdint.h>
 #include <linux/ioctl.h>
 #include <linux/types.h>
 
