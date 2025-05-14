@@ -44,7 +44,7 @@ int main() {
         printf("  Status after chirp=1: 0x%08x\n", status);
         
         // Short delay
-        usleep(10000);  // 10ms
+        usleep(2000000);  // 2s
         
         // Set chirp=0
         uint32_t cfg_off = (65535 << 16) | 0;
@@ -62,7 +62,7 @@ int main() {
         printf("  Status after chirp=0: 0x%08x\n\n", status);
         
         // Short delay between cycles
-        usleep(5000000);  // 5s
+        usleep(100000);  // 1s
     }
     
     // Try different timeout values
