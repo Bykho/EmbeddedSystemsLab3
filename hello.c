@@ -57,9 +57,9 @@ int main(void) {
         angle = (int)roundf(theta);
 
         // Update chirp state at 2° and 177°
-        if (angle == 2) {
+        if (angle == 6) {
             chirp = 999;
-        } else if (angle == 177) {
+        } else if (angle == 174) {
             chirp = 0;
         }
 
