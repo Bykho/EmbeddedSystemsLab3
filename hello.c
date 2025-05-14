@@ -78,7 +78,7 @@ int main(void) {
                 break;
             }
             status[32] = '\0';
-            printf("Echo status @ %3d° = 0x%s\n", angle, status);
+            printf("Echo status @ %3d° = 0x%s, chirp = %d\n", angle, status, chirp);
         }
 
         // Compute line geometry
