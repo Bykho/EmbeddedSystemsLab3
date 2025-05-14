@@ -21,7 +21,7 @@
  *     0       = still waiting
  *     else    = echo length
  */
-#define US_READ_STATUS   _IOR(ULTRASONIC_MAGIC, 2, __u32)
+#define US_READ_STATUS   _IOR(ULTRASONIC_MAGIC, 2, uint32_t)
 
 /* Device name */
 #define ULTRASONIC_DEV_NAME  "ultrasonic_sensor"

@@ -165,6 +165,7 @@ static int __init vga_ball_probe(struct platform_device *pdev)
 	}
 
 	/* Make sure we can use these registers */
+	printk(KERN_INFO "vga dev.res.start: %d, resource size: %d...\n", (int)dev.res.start, (int)resource_size(&dev.res));
 	if (request_mem_region(dev.res.start, resource_size(&dev.res),
 			       DRIVER_NAME) == NULL) {
 		ret = -EBUSY;
