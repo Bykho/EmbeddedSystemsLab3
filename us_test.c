@@ -62,7 +62,7 @@ int main() {
         printf("  Status after chirp=0: 0x%08x\n\n", status);
         
         // Short delay between cycles
-        usleep(50000);  // 50ms
+        usleep(5000000);  // 5s
     }
     
     // Try different timeout values
