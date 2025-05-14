@@ -1,1 +1,0 @@
-cmd_/root/lab3-sw/ultrasonic_sensor.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /root/lab3-sw/ultrasonic_sensor.ko /root/lab3-sw/ultrasonic_sensor.o /root/lab3-sw/ultrasonic_sensor.mod.o ;  true
