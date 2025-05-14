@@ -17,7 +17,7 @@
 #define ULTRASONIC_BASE_PHYS  0xFF300000  /* adjust to your Qsys base */
 #define ULTRASONIC_REG_SIZE   0x4         /* one 32-bit register */
 #define DRIVER_NAME "ultrasonic_sensor"
-#define STATUS(x) (x)
+#define STATUS(x) (x + 4)
 
 //static void __iomem *us_base;
 
@@ -34,42 +34,7 @@ static void read_status(uint32_t *status)
     printk(KERN_INFO "status%d...\n", *status);
 }
 
-/* Initialization code */
-static int __init ultrasonic_sensor_probe(struct platform_device *pdev)
-{
-    int ret;
-    /* Register ourselves as a misc device: creates /dev/ultrasonic_sensor */
-	ret = misc_register(&ultrasonic_sensor_misc_device);
 
-    /* Get the address of our registers from the device tree */
-	ret = of_address_to_resource(pdev->dev.of_node, 0, &dev.res); // okay the index is going to have to be different for status vs for the thing we write to i think.
-	if (ret) {
-		ret = -ENOENT;
-		goto out_deregister;
-	}
-
-    /* Make sure we can use these registers */
-    printk(KERN_INFO "sensor: dev.res.start: %d, resource size: %d...\n", (int)dev.res.start, (int)resource_size(&dev.res));
-    if (!request_mem_region(dev.res.start, resource_size(&dev.res), ULTRASONIC_DEV_NAME)) {
-        pr_err("ultrasonic: mem region busy\n");
-        return -EBUSY;
-        goto out_deregister;
-    }
-
-    /* Arrange access to our registers */
-    dev.virtbase = of_iomap(pdev->dev.of_node, 0); // index of the i/o range? i don't know 
-    if (dev.virtbase == NULL) {
-		ret = -ENOMEM;
-		goto out_release_mem_region;
-	}
-
-    return 0;
-out_release_mem_region:
-	release_mem_region(dev.res.start, resource_size(&dev.res));
-out_deregister:
-	misc_deregister(&ultrasonic_sensor_misc_device);
-	return ret;
-}
 
 static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
 {
@@ -108,6 +73,43 @@ static struct miscdevice ultrasonic_sensor_misc_device = {
 	.name		= DRIVER_NAME,
 	.fops		= &ultrasonic_fops,
 };
+
+/* Initialization code */
+static int __init ultrasonic_sensor_probe(struct platform_device *pdev)
+{
+    int ret;
+    /* Register ourselves as a misc device: creates /dev/ultrasonic_sensor */
+	ret = misc_register(&ultrasonic_sensor_misc_device);
+
+    /* Get the address of our registers from the device tree */
+	ret = of_address_to_resource(pdev->dev.of_node, 0, &dev.res); // okay the index is going to have to be different for status vs for the thing we write to i think.
+	if (ret) {
+		ret = -ENOENT;
+		goto out_deregister;
+	}
+
+    /* Make sure we can use these registers */
+    printk(KERN_INFO "sensor: dev.res.start: %d, resource size: %d...\n", (int)dev.res.start, (int)resource_size(&dev.res));
+    if (!request_mem_region(dev.res.start, resource_size(&dev.res), ULTRASONIC_DEV_NAME)) {
+        pr_err("ultrasonic: mem region busy\n");
+        return -EBUSY;
+        goto out_deregister;
+    }
+
+    /* Arrange access to our registers */
+    dev.virtbase = of_iomap(pdev->dev.of_node, 0); // index of the i/o range? i don't know 
+    if (dev.virtbase == NULL) {
+		ret = -ENOMEM;
+		goto out_release_mem_region;
+	}
+
+    return 0;
+out_release_mem_region:
+	release_mem_region(dev.res.start, resource_size(&dev.res));
+out_deregister:
+	misc_deregister(&ultrasonic_sensor_misc_device);
+	return ret;
+}
 
 /* Clean-up code: release resources */
 static int ultrasonic_sensor_remove(struct platform_device *pdev)
