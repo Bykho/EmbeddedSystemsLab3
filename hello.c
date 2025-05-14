@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
-#define SLEEP_TIME     50000  // 50ms delay between updates
+#define SLEEP_TIME     500000  // 50ms delay between updates
 
 int main(void) {
     int  vga_ball_fd, us_fd;
@@ -49,8 +49,8 @@ int main(void) {
     // Main loop
     while (1) {
         // Update theta
-        if (theta >= 178.0f) clockWise = false;
-        else if (theta <= 1.0f) clockWise = true;
+        if (theta >= 175.0f) clockWise = false;
+        else if (theta <= 5.0f) clockWise = true;
         theta += (clockWise ? +1.0f : -1.0f);
 
         // Convert and clamp to int
