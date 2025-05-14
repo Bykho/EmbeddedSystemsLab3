@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "ultrasonic_sensor.h": "c"
+        "ultrasonic_sensor.h": "c",
+        "stdint.h": "c"
     }
 }

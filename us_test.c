@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <stdint.h>
 #include <sys/ioctl.h>
 #include "ultrasonic_sensor.h"
 
