@@ -86,64 +86,25 @@ int main(void) {
 
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
 
-        // Define 3 simulated objects in the scene
-        struct {
-            int x;
-            int y;
-        } objects[] = {
-            {SCREEN_WIDTH/4, VGA_BUFFER_HEIGHT/4},      // Left side, upper quarter
-            {SCREEN_WIDTH/2, VGA_BUFFER_HEIGHT/2},      // Center, middle
-            {3*SCREEN_WIDTH/4, 3*VGA_BUFFER_HEIGHT/4}   // Right side, lower quarter
-        };
+
+
 
         // Compute line geometry
-        int num = (int)(VGA_BUFFER_HEIGHT * sin(theta * (float)M_PI / 180.0f));
+        int num = (int)(VGA_BUFFER_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
+
+
         if (num < 0) num = 0;
         if (num > SCREEN_HEIGHT) num = SCREEN_HEIGHT;
-
-        // Check for intersections with simulated objects
-        float angle_rad = theta * (float)M_PI / 180.0f;
-        float cos_theta = cos(angle_rad);
-        float sin_theta = sin(angle_rad);
-        
-        // Start with the full line length
-        int original_num = num;
-        
-        // Check each object for intersection
-        for (int i = 0; i < sizeof(objects)/sizeof(objects[0]); i++) {
-            // Calculate object position relative to radar center
-            int rel_x = objects[i].x - SCREEN_WIDTH/2;
-            int rel_y = objects[i].y;
-            
-            // Calculate distance to object along the ray direction
-            float dot_product = rel_x * cos_theta + rel_y * sin_theta;
-            
-            // Only consider objects in front of the radar
-            if (dot_product > 0) {
-                // Calculate perpendicular distance from ray to object (for collision detection)
-                float perp_dist = fabs(rel_x * sin_theta - rel_y * cos_theta);
-                
-                // If object is close enough to the ray, consider it an intersection
-                if (perp_dist < 15) {  // 15 pixels tolerance for "hitting" an object
-                    // Convert dot_product to VGA_BUFFER_HEIGHT scale
-                    int hit_distance = (int)(dot_product / VGA_BUFFER_HEIGHT * original_num);
-                    
-                    // If this hit is closer than current line length, shorten the line
-                    if (hit_distance < num) {
-                        num = hit_distance;
-                        // Optional: Change line color or thickness at intersection point
-                    }
-                }
-            }
-        }
 
         for (int y = 0; y < VGA_BUFFER_HEIGHT; y++) {
             if (y < num) {
                 int vx = (num > 0)
                     ? (int)(((float)VGA_BUFFER_HEIGHT / num) * y)
                     : 0;
-                int x0 = SCREEN_WIDTH/2 + (int)(cos(theta * (float)M_PI / 180.0f) * vx) - (2 + AngleDistanceFrom90);
-                int x1 = SCREEN_WIDTH/2 + (int)(cos(theta * (float)M_PI / 180.0f) * vx) + (2 + AngleDistanceFrom90);
+                int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - (2 + AngleDistanceFrom90);
+                int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + (2 + AngleDistanceFrom90);
+
+
                 // Clamp
                 if (x0 < 0) x0 = 0;
                 if (x1 >= SCREEN_WIDTH) x1 = SCREEN_WIDTH - 1;
