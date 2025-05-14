@@ -58,7 +58,7 @@ int main(void) {
 
         // Update chirp state at 2° and 177°
         if (angle == 2) {
-            chirp = 1;
+            chirp = 999;
         } else if (angle == 177) {
             chirp = 0;
         }
