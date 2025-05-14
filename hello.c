@@ -72,12 +72,13 @@ int main(void) {
 
         // Every 10°, read and print status
         if (angle % 10 == 0) {
-            uint32_t status;
+            char[33] status;
             if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
                 perror("US_READ_STATUS failed");
                 break;
             }
-            printf("Echo status @ %3d° = 0x%08x\n", angle, status);
+            status[32] = '\0';
+            printf("Echo status @ %3d° = 0x%s\n", angle, status);
         }
 
         // Compute line geometry
