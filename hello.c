@@ -72,7 +72,7 @@ int main(void) {
 
         // Every 10°, read and print status
         if (angle % 10 == 0) {
-            char[33] status;
+            char status[33];
             if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
                 perror("US_READ_STATUS failed");
                 break;
