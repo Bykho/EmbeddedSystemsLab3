@@ -9,7 +9,6 @@
 #include <stddef.h>
 #include <math.h>
 #include <stdbool.h>
-#include <pthread.h>       // Add pthread header
 #include "vga_ball.h"
 #include "ultrasonic_sensor.h"
 
@@ -27,7 +26,6 @@ int main(void) {
     bool              clockWise = true;
     uint16_t          chirp = 0;            // current chirp bit
     int               angle;
-    pthread_t         us_thread;
     int               thread_running = 0;
 
     // Open VGA device
@@ -123,11 +121,6 @@ int main(void) {
         //usleep(SLEEP_TIME);
     }
 
-    // Cleanup
-    if (thread_running) {
-        pthread_cancel(us_thread);  // Cancel the thread
-        pthread_join(us_thread, NULL);  // Wait for it to terminate
-    }
     close(us_fd);
     close(vga_ball_fd);
     return 0;
