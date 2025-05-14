@@ -151,3 +151,7 @@ static void __exit ultrasonic_exit(void)
 
 module_init(ultrasonic_init);
 module_exit(ultrasonic_exit);
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("als2408 nb3227, Columbia University");
+MODULE_DESCRIPTION("ultrasonic driver");
