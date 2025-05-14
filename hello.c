@@ -66,7 +66,7 @@ int main(void) {
         // Pack 32-bit config: [31:16]=time, [15:0]=chirp
         // 3000000 nanoseconds = 60 milliseconds
         uint16_t timeout = 65536;
-        uint32_t cfg = (timeout | chirp);
+        uint32_t cfg = (timeout << 16| chirp);
         printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
         if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
             perror("US_WRITE_CONFIG failed");
@@ -83,6 +83,10 @@ int main(void) {
             printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
         }
 
+
+        int AngleDistanceFrom90 = fabs(90 - angle) / 30;
+
+
         // Compute line geometry
         int num = (int)(VGA_BUFFER_HEIGHT * sinf(theta * (float)M_PI / 180.0f));
         if (num < 0) num = 0;
@@ -93,8 +97,8 @@ int main(void) {
                 int vx = (num > 0)
                     ? (int)(((float)VGA_BUFFER_HEIGHT / num) * y)
                     : 0;
-                int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - 5;
-                int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + 5;
+                int x0 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) - (2 + AngleDistanceFrom90);
+                int x1 = SCREEN_WIDTH/2 + (int)(cosf(theta * (float)M_PI / 180.0f) * vx) + (2 + AngleDistanceFrom90);
                 // Clamp
                 if (x0 < 0) x0 = 0;
                 if (x1 >= SCREEN_WIDTH) x1 = SCREEN_WIDTH - 1;
