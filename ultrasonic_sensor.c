@@ -18,7 +18,7 @@
 #define ULTRASONIC_REG_SIZE   0x4         /* one 32-bit register */
 #define DRIVER_NAME "ultrasonic_sensor"
 #define STATUS(x) (x + 4)
-#define CHIRP_TIMEOUT_DATA(x)
+#define CHIRP_TIMEOUT_DATA(x) (x)
 
 //static void __iomem *us_base;
 
@@ -29,7 +29,7 @@ struct ultrasonic_sensor_dev {
 
 static void write_data(uint32_t data)
 {
-    printk(KERN_INFO "just wrote (allegedly) %d...\n", *data);
+    printk(KERN_INFO "just wrote (allegedly) %d to %d...\n", data, (int)dev.virtbase);
     iowrite32(data, CHIRP_TIMEOUT_DATA(dev.virtbase));
 }
 
@@ -47,7 +47,7 @@ static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long 
 
     switch (cmd) {
     case US_WRITE_CONFIG:
-        if (copy_from_user(&value, (uint32_t *)arg, sizeof(val))) // copy arg into value
+        if (copy_from_user(&value, (uint32_t *)arg, sizeof(value))) // copy arg into value
             return -EFAULT;
         write_data(value);
         break;
