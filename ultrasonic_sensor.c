@@ -29,16 +29,18 @@ struct ultrasonic_sensor_dev {
 
 static void write_data(uint32_t data)
 {
+    void *addr = CHIRP_TIMEOUT_DATA(dev.virtbase);
     printk(KERN_INFO "just wrote (allegedly) %d to %d...\n", data, (int)dev.virtbase);
-    iowrite32(data, CHIRP_TIMEOUT_DATA(dev.virtbase));
+    iowrite32(data, addr);
 }
 
 static void read_status(uint32_t *status)
 {
     /* each entry is two 32-bit words, at offsets 8..2055 */
     // maybe add an offset? since we are working with 2 registers?
-    *status = ioread32(STATUS(dev.virtbase)); // takes in an address
-    printk(KERN_INFO "status%d...\n", *status);
+    void *addr = STATUS(dev.virtbase);
+    *status = ioread32(addr); // takes in an address
+    printk(KERN_INFO "Read status 0x%08x from address %p\n", *status, addr);
 }
 
 static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long arg)
