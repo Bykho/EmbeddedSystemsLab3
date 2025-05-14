@@ -10,7 +10,7 @@ else
 	KERNEL_SOURCE := /usr/src/linux-headers-$(shell uname -r)
         PWD := $(shell pwd)
 
-default: module hello
+default: module hello us_test
 
 module:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} modules
@@ -18,11 +18,14 @@ module:
 hello:
 	$(CC) -o hello hello.c -lm
 
+us_test:
+	$(CC) -o us_test us_test.c
+
 clean:
 	${MAKE} -C ${KERNEL_SOURCE} SUBDIRS=${PWD} clean
-	${RM} hello
+	${RM} hello us_test
 
-TARFILES = Makefile README vga_ball.h vga_ball.c hello.c
+TARFILES = Makefile README vga_ball.h vga_ball.c hello.c ultrasonic_sensor.c ultrasonic_sensor.h us_test.c
 TARFILE = lab3-sw.tar.gz
 .PHONY : tar
 tar : $(TARFILE)
