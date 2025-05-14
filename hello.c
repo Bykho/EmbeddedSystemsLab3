@@ -67,6 +67,7 @@ int main(void) {
         // 3000000 nanoseconds = 60 milliseconds
         uint16_t timeout = 65536;
         uint32_t cfg = (timeout | chirp);
+        printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
         if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
             perror("US_WRITE_CONFIG failed");
             break;
@@ -74,13 +75,12 @@ int main(void) {
 
         // Every 10°, read and print status
         if (angle % 10 == 0) {
-            char status[33];
+            uint32_t status;
             if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
                 perror("US_READ_STATUS failed");
                 break;
             }
-            status[32] = '\0';
-            printf("Echo status @ %3d° = 0x%s, chirp = %d\n", angle, status, chirp);
+            printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
         }
 
         // Compute line geometry
