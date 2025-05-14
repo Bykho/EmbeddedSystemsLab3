@@ -26,7 +26,7 @@ struct ultrasonic_sensor_dev {
 	void __iomem *virtbase; /* Where registers can be accessed in memory */
 } dev;
 
-static void read_status(*uint32_t status)
+static void read_status(uint32_t *status)
 {
     /* each entry is two 32-bit words, at offsets 8..2055 */
     // maybe add an offset? since we are working with 2 registers?
@@ -34,25 +34,11 @@ static void read_status(*uint32_t status)
     printk(KERN_INFO "status%d...\n", *status);
 }
 
-/* The operations our device knows how to do */
-static const struct file_operations ultrasonic_fops = {
-    .owner          = THIS_MODULE,
-    .unlocked_ioctl = ultrasonic_ioctl,
-    .compat_ioctl   = ultrasonic_ioctl,
-};
-
-/* Information about our device for the "misc" framework -- like a char dev */
-static struct miscdevice ultrasonic_sensor_misc_device = {
-	.minor		= MISC_DYNAMIC_MINOR,
-	.name		= DRIVER_NAME,
-	.fops		= &ultrasonic_fops,
-};
-
 /* Initialization code */
 static int __init ultrasonic_sensor_probe(struct platform_device *pdev)
 {
     int ret;
-    /* Register ourselves as a misc device: creates /dev/vga_ball */
+    /* Register ourselves as a misc device: creates /dev/ultrasonic_sensor */
 	ret = misc_register(&ultrasonic_sensor_misc_device);
 
     /* Get the address of our registers from the device tree */
@@ -81,7 +67,7 @@ static int __init ultrasonic_sensor_probe(struct platform_device *pdev)
 out_release_mem_region:
 	release_mem_region(dev.res.start, resource_size(&dev.res));
 out_deregister:
-	misc_deregister(&vga_ball_misc_device);
+	misc_deregister(&ultrasonic_sensor_misc_device);
 	return ret;
 }
 
@@ -95,7 +81,7 @@ static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long 
     case US_WRITE_CONFIG:
         if (copy_from_user(&val, (void __user *)arg, sizeof(val)))
             return -EFAULT;
-        iowrite32(val, us_base);
+        iowrite32(val, STATUS(dev.virtbase));
         break;
     case US_READ_STATUS:
         read_status(&value);
@@ -108,6 +94,20 @@ static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long 
         return -ENOTTY;
     }
 }
+
+/* The operations our device knows how to do */
+static const struct file_operations ultrasonic_fops = {
+    .owner          = THIS_MODULE,
+    .unlocked_ioctl = ultrasonic_ioctl,
+    .compat_ioctl   = ultrasonic_ioctl,
+};
+
+/* Information about our device for the "misc" framework -- like a char dev */
+static struct miscdevice ultrasonic_sensor_misc_device = {
+	.minor		= MISC_DYNAMIC_MINOR,
+	.name		= DRIVER_NAME,
+	.fops		= &ultrasonic_fops,
+};
 
 /* Clean-up code: release resources */
 static int ultrasonic_sensor_remove(struct platform_device *pdev)
@@ -146,7 +146,7 @@ static int __init ultrasonic_init(void)
 static void __exit ultrasonic_exit(void)
 {
     platform_driver_unregister(&ultrasonic_sensor_driver);
-	pr_info(DRIVER_NAME ": exit\n")
+	pr_info(DRIVER_NAME ": exit\n");
 }
 
 module_init(ultrasonic_init);
