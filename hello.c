@@ -66,7 +66,7 @@ int main(void) {
         // Pack 32-bit config: [31:16]=time, [15:0]=chirp
         // 3000000 nanoseconds = 60 milliseconds
         uint16_t timeout = 65535;
-        uint32_t cfg = (timeout << 16| chirp);
+        uint32_t cfg = (chirp << 16 | timeout);
         printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
         if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
             perror("US_WRITE_CONFIG failed");
