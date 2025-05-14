@@ -56,6 +56,7 @@ static long ultrasonic_ioctl(struct file *file, unsigned int cmd, unsigned long 
     default:
         return -ENOTTY;
     }
+    return 0;
 }
 
 /* The operations our device knows how to do */
