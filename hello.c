@@ -18,20 +18,6 @@
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
 #define SLEEP_TIME     500000  // 500ms delay between updates
 
-// Thread function for ultrasonic sensor status reading
-void *read_us_status(void *arg) {
-    int *us_fd_ptr = (int *)arg;
-    uint32_t status;
-    while (1) {
-        if (ioctl(*us_fd_ptr, US_READ_STATUS, &status) < 0) {
-            perror("US_READ_STATUS failed in thread");
-            pthread_exit(NULL);
-        }
-        printf("Echo status in thread = 0x%08x\n", status);
-        usleep(500000); // Sleep for 500ms between reads
-    }
-    return NULL;
-}
 
 int main(void) {
     int  vga_ball_fd, us_fd;
@@ -64,14 +50,6 @@ int main(void) {
         LineMatrix[y][1] = SCREEN_WIDTH/2;
     }
 
-    // Start the thread and pass ultrasonic sensor file descriptor
-    if (pthread_create(&us_thread, NULL, read_us_status, &us_fd) != 0) {
-        perror("Failed to create ultrasonic sensor thread");
-        close(us_fd);
-        return 1;
-    }
-    thread_running = 1;
-
     // Main loop
     while (1) {
         // Update theta
@@ -99,7 +77,7 @@ int main(void) {
         }
 
         // Every 2°, read and print status from main thread
-        if (angle % 2 == 0) {
+        if (angle % 1 == 0) {
             uint32_t status;
             if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
                 perror("US_READ_STATUS failed");
@@ -142,7 +120,7 @@ int main(void) {
             break;
         }
 
-        usleep(SLEEP_TIME);
+        //usleep(SLEEP_TIME);
     }
 
     // Cleanup
