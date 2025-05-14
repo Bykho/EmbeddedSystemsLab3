@@ -36,16 +36,21 @@ int main() {
             break;
         }
         
+        // Short delay
+        usleep(2000000);  // 2s
+        
+
         // Read status immediately
         if (ioctl(fd, US_READ_STATUS, &status) < 0) {
             perror("ioctl read");
             break;
         }
         printf("  Status after chirp=1: 0x%08x\n", status);
-        
+
+
         // Short delay
         usleep(2000000);  // 2s
-        
+
         // Set chirp=0
         uint32_t cfg_off = (65535 << 16) | 0;
         printf("Cycle %d: Setting chirp=0 (0x%08x)\n", i, cfg_off);
@@ -54,6 +59,9 @@ int main() {
             break;
         }
         
+        // Short delay
+        usleep(2000000);  // 2s
+
         // Read status immediately
         if (ioctl(fd, US_READ_STATUS, &status) < 0) {
             perror("ioctl read");
@@ -67,24 +75,7 @@ int main() {
     
     // Try different timeout values
     printf("\nTesting different timeout values with chirp=1...\n");
-    
-    uint32_t timeouts[] = {1, 100, 1000, 10000, 65535};
-    for (int i = 0; i < 5; i++) {
-        uint32_t cfg = (timeouts[i] << 16) | 1;
-        printf("Setting timeout=%u (0x%08x)\n", timeouts[i], cfg);
-        if (ioctl(fd, US_WRITE_CONFIG, &cfg) < 0) {
-            perror("ioctl write");
-            break;
-        }
-        
-        // Read status
-        if (ioctl(fd, US_READ_STATUS, &status) < 0) {
-            perror("ioctl read");
-            break;
-        }
-        printf("  Status: 0x%08x\n", status);
-    }
-    
+
     // Reset to idle
     uint32_t cfg_idle = 0;
     printf("\nResetting to idle (0x%08x)\n", cfg_idle);
