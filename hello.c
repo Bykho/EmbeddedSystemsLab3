@@ -77,7 +77,7 @@ int main(void) {
             } 
             chirp = 0;
         }
-        if (status != 3 || status != 0 || status != 1 || status != 2) {
+        if (status != 3 ) {
             printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
         }
         uint16_t timeout = TIMEOUT_LIMIT;  // Max 16-bit value
