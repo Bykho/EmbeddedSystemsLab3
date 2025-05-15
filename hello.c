@@ -50,7 +50,7 @@ int main(void) {
 
     int TIMEOUT_LIMIT = 500;
     uint32_t status = 0;
-    int counter = 0
+    int counter = 0;
     // Main loop
     while (1) {
         angle = (int)roundf(theta);
