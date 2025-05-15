@@ -50,14 +50,17 @@ int main(void) {
 
     int TIMEOUT_LIMIT = 500;
     uint32_t status = 0;
+    int counter = 0
     // Main loop
     while (1) {
-
-        // Update theta
-        if (theta >= 175.0f) clockWise = false;
-        else if (theta <= 5.0f) clockWise = true;
-        theta += (clockWise ? +1.0f : -1.0f);
         angle = (int)roundf(theta);
+        // Update theta
+        if (counter == 1000000) {
+            if (theta >= 175.0f) clockWise = false;
+            else if (theta <= 5.0f) clockWise = true;
+            theta += (clockWise ? +1.0f : -1.0f);
+            counter = 0;
+        }
         int distance = 0;
 
 
@@ -117,7 +120,7 @@ int main(void) {
             break;
         }
 
-        usleep(SLEEP_TIME);
+        counter++;
     }
 
     close(us_fd);
