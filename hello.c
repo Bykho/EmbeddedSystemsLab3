@@ -77,11 +77,12 @@ int main(void) {
             } 
             chirp = 0;
         }
-        printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
-
+        if (status != 3 || status != 0 || status != 1 || status != 2) {
+            printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
+        }
         uint16_t timeout = TIMEOUT_LIMIT;  // Max 16-bit value
         uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
-        printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
+        //printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
              if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
                  perror("US_WRITE_CONFIG failed");
                  break;
