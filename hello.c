@@ -128,7 +128,7 @@ int main(void) {
             break;
         }
 
-        usleep(SLEEP_TIME);
+       //  usleep(SLEEP_TIME);
     }
 
     close(us_fd);
