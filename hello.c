@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
-#define SLEEP_TIME     50000  // 500ms delay between updates
+#define SLEEP_TIME     500000  // 500ms delay between updates
 
 
 int main(void) {
@@ -48,61 +48,41 @@ int main(void) {
         LineMatrix[y][1] = SCREEN_WIDTH/2;
     }
 
+    int TIMEOUT_LIMIT = 500;
+    uint32_t status = 0;
     // Main loop
     while (1) {
+
         // Update theta
         if (theta >= 175.0f) clockWise = false;
         else if (theta <= 5.0f) clockWise = true;
         theta += (clockWise ? +1.0f : -1.0f);
-
-        // Convert and clamp to int
         angle = (int)roundf(theta);
+        int distance = 0;
 
-        // Update chirp state at specific angles
-        chirp = 1;
-        uint32_t sum_status = 0;
-        int valid_readings = 0;
+
+        if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
+            perror("US_READ_STATUS failed");
+            break;
+        }
         
-        //Every 2°, read and print status from main thread
-            if (angle % 1 == 0) {
-                uint32_t status;
-                if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
-                    perror("US_READ_STATUS failed");
-                    break;
-                }
-                printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
-            }
-        // for (int i = 0; i < 1000; i++) {
-        //     // Pack 32-bit config: [31:16]=time, [15:0]=chirp
-        //     uint16_t timeout = 65535;  // Max 16-bit value
-        //     uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
-        //     //printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
-        //     if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
-        //         perror("US_WRITE_CONFIG failed");
-        //         break;
-        //     }
+        if (status == 0){
+            chirp = 1;
+        } else if (status > 3) {
+            if (status < TIMEOUT_LIMIT) {
+                distance = status;
+            } 
+            chirp = 0;
+        }
+        printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
 
-        //     // Every 2°, read and print status from main thread
-        //     if (angle % 1 == 0) {
-        //         uint32_t status;
-        //         if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
-        //             perror("US_READ_STATUS failed");
-        //             break;
-        //         }
-        //         //printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
-                
-        //         // Add to average if not timeout value
-        //         if (status != 0x80000003) {
-        //             sum_status += status;
-        //             valid_readings++;
-        //         }
-        //     }
-            
-        // }
-
-        //// int final_distance = (valid_readings > 0) ? sum_status : 0;
-        //// printf("Final max distance: %d\n", final_distance);
-
+        uint16_t timeout = TIMEOUT_LIMIT;  // Max 16-bit value
+        uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
+        printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
+             if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
+                 perror("US_WRITE_CONFIG failed");
+                 break;
+             }
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
 
         // Compute line geometry
