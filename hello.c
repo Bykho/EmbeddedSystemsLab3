@@ -82,17 +82,15 @@ int main(void) {
                 }
                 //printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
                 
+
+                printf("Status: %d\n", status);
                 // Add to average if not timeout value
-                if (status != 0x80000003) {
-                    sum_status += status;
-                    valid_readings++;
-                }
             }
             
         }
 
-        int final_distance = (valid_readings > 0) ? sum_status : 0;
-        printf("Final max distance: %d\n", final_distance);
+        //int final_distance = (valid_readings > 0) ? sum_status : 0;
+        //printf("Final max distance: %d\n", final_distance);
 
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
 
