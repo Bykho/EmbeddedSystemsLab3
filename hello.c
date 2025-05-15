@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
-#define SLEEP_TIME     5000  // 500ms delay between updates
+#define SLEEP_TIME     5  // 500ms delay between updates
 
 
 int main(void) {
@@ -63,7 +63,7 @@ int main(void) {
         uint32_t sum_status = 0;
         int valid_readings = 0;
         
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 1000; i++) {
             // Pack 32-bit config: [31:16]=time, [15:0]=chirp
             uint16_t timeout = 65535;  // Max 16-bit value
             uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
@@ -89,8 +89,9 @@ int main(void) {
                 }
             }
             
-            usleep(10);
+            usleep(1);
         }
+
 
         int final_distance = (valid_readings > 0) ? (sum_status / valid_readings) : 0;
         printf("Final average distance: %d\n", final_distance);
