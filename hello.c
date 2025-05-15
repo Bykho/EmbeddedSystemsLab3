@@ -89,7 +89,7 @@ int main(void) {
                 }
             }
             
-            usleep(1000);
+            usleep(10);
         }
 
         int final_distance = (valid_readings > 0) ? (sum_status / valid_readings) : 0;
