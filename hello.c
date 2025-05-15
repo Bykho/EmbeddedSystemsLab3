@@ -59,30 +59,41 @@ int main(void) {
         angle = (int)roundf(theta);
 
         // Update chirp state at specific angles
-        if (angle == 6) {
-            chirp = 1;  // Using 1 directly, as only bit 0 is used
-        } else if (angle == 174) {
-            chirp = 0;
-        }
-
-        // Pack 32-bit config: [31:16]=time, [15:0]=chirp
-        uint16_t timeout = 65535;  // Max 16-bit value
-        uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
-        printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
-        if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
-            perror("US_WRITE_CONFIG failed");
-            break;
-        }
-
-        // Every 2°, read and print status from main thread
-        if (angle % 1 == 0) {
-            uint32_t status;
-            if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
-                perror("US_READ_STATUS failed");
+        chirp = 1;
+        uint32_t sum_status = 0;
+        int valid_readings = 0;
+        
+        for (int i = 0; i < 1000; i++) {
+            // Pack 32-bit config: [31:16]=time, [15:0]=chirp
+            uint16_t timeout = 65535;  // Max 16-bit value
+            uint32_t cfg = ((timeout & 0xFFFF) << 16) | (chirp & 0x1);
+            //printf("Writing config: timeout=0x%04x, chirp=%d, cfg=0x%08x\n", timeout, chirp, cfg);
+            if (ioctl(us_fd, US_WRITE_CONFIG, &cfg) < 0) {
+                perror("US_WRITE_CONFIG failed");
                 break;
             }
-            printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
+
+            // Every 2°, read and print status from main thread
+            if (angle % 1 == 0) {
+                uint32_t status;
+                if (ioctl(us_fd, US_READ_STATUS, &status) < 0) {
+                    perror("US_READ_STATUS failed");
+                    break;
+                }
+                //printf("Echo status @ %3d° = 0x%08x, chirp = %d\n", angle, status, chirp);
+                
+                // Add to average if not timeout value
+                if (status != 0x80000003) {
+                    sum_status += status;
+                    valid_readings++;
+                }
+            }
+            
+            usleep(1);
         }
+
+        int final_distance = (valid_readings > 0) ? (sum_status / valid_readings) : 0;
+        printf("Final average distance: %d\n", final_distance);
 
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
 
@@ -118,7 +129,7 @@ int main(void) {
             break;
         }
 
-        //usleep(SLEEP_TIME);
+        usleep(SLEEP_TIME);
     }
 
     close(us_fd);
