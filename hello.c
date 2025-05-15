@@ -92,9 +92,8 @@ int main(void) {
             usleep(1);
         }
 
-
-        int final_distance = (valid_readings > 0) ? (sum_status / valid_readings) : 0;
-        printf("Final average distance: %d\n", final_distance);
+        int final_distance = (valid_readings > 0) ? sum_status : 0;
+        printf("Final max distance: %d\n", final_distance);
 
         int AngleDistanceFrom90 = fabs(90 - angle) / 30;
 
