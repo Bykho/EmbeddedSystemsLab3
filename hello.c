@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH   640
 #define SCREEN_HEIGHT  480
 #define VGA_BUFFER_HEIGHT 256 // Max lines for the VGA driver buffer
-#define SLEEP_TIME     5  // 500ms delay between updates
+#define SLEEP_TIME     500000  // 500ms delay between updates
 
 
 int main(void) {
